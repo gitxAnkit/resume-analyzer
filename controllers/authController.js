@@ -24,11 +24,3 @@ export const loginUser = catchAsyncErrors(async (req, res, next) => {
         JWT: token,
     })
 });
-
-//get 
-export const getUser = catchAsyncErrors(async (req, res, next) => {
-    res.json({
-        success: true,
-        user: req.user
-    })
-})

@@ -3,9 +3,10 @@ import catchAsyncErrors from "../utils/catchAsyncErrors.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import dotenv from "dotenv";
 import Applicant from "../models/applicantModel.js";
+import { ErrorHandler } from "../utils/errorHandler.js";
 
 dotenv.config();
-
+// Helper function to extract text from pdf
 const extractTextFromURL = async (url) => {
     try {
         if (!url) {
@@ -19,15 +20,12 @@ const extractTextFromURL = async (url) => {
         throw new Error("Failed to extract text from the PDF. Please check the URL and try again.");
     }
 };
-
+// POST /resume/extract
 export const extractPdf = catchAsyncErrors(async (req, res, next) => {
     const { url } = req.body;
 
     if (!url) {
-        return res.status(400).json({
-            success: false,
-            message: "PDF URL is required",
-        });
+        return next(new ErrorHandler("Pdf url is required", 400));
     }
 
     // Extract text from the PDF
@@ -88,7 +86,7 @@ export const extractPdf = catchAsyncErrors(async (req, res, next) => {
         });
 
         const responseText = await result.response.text();
-        console.log("Raw AI Response:", responseText);
+        // console.log("Raw AI Response:", responseText);
 
         let resume;
         try {
@@ -100,7 +98,6 @@ export const extractPdf = catchAsyncErrors(async (req, res, next) => {
                 message: "Failed to process resume. AI response is not a valid JSON.",
             });
         }
-        // Ensure required fields are present
         if (!resume.name || !resume.email) {
             return res.status(400).json({
                 success: false,
@@ -112,7 +109,6 @@ export const extractPdf = catchAsyncErrors(async (req, res, next) => {
             exp.endDate = exp.endDate && exp.endDate !== "Present" ? exp.endDate.split("T")[0] : null;
         });
 
-        // Save to MongoDB
         const applicant = await Applicant.create(resume);
 
         return res.status(201).json({
@@ -128,4 +124,39 @@ export const extractPdf = catchAsyncErrors(async (req, res, next) => {
         });
     }
 
+});
+// GET /resume/search
+export const searchApplicant = catchAsyncErrors(async (req, res, next) => {
+    const { name } = req.body;
+
+    if (!name) {
+        return next(new ErrorHandler("Name is required for searching", 400));
+    }
+
+    const applicant = await Applicant.find({
+        name: { $regex: new RegExp(name, "i") }
+    });
+
+    if (applicant.length === 0) {
+        return next(new ErrorHandler("No match found", 404));
+    }
+
+    res.status(200).json({
+        success: true,
+        count: applicant.length,
+        applicant
+    });
+});
+// GET /applicants
+export const getApplicants = catchAsyncErrors(async (req, res, next) => {
+
+    const applicants = await Applicant.find();
+    if (applicants.length === 0) {
+        return next(new ErrorHandler("No applicants found.", 404));
+    }
+    res.status(200).json({
+        success: true,
+        count: applicants.length,
+        applicants
+    });
 });

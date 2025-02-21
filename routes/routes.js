@@ -1,11 +1,14 @@
 import express from "express";
-import { getUser, loginUser } from "../controllers/authController.js";
+import { loginUser } from "../controllers/authController.js";
 import { isAuthenticated } from "../middlewares/auth.js";
-import { extractPdf } from "../controllers/resumeControllers.js";
+import { extractPdf, getApplicants, searchApplicant } from "../controllers/resumeControllers.js";
 
 const router = express.Router();
 
 router.route("/auth/login").post(loginUser);
-router.route("/auth/user").get(isAuthenticated, getUser);
-router.route("/resume/extract").post(extractPdf);
+
+router.route("/resume/extract").post(isAuthenticated, extractPdf);
+router.route("/resume/search").get(isAuthenticated, searchApplicant);
+router.route("/applicants").get(isAuthenticated, getApplicants);
+
 export default router;
