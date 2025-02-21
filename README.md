@@ -3,6 +3,8 @@
 
 This is a backend API for extracting and storing applicant data from pdf resume. The API utilizes **Node.js, Express, MongoDB, and Google Gemini AI** to parse resumes, extract key details and store them securely in a database.
 
+Test this API on **[POSTMAN COLLECTION.](https://www.postman.com/warped-astronaut-754683/workspace/new-public-workspace/collection/34165850-43a9f53e-14c4-49b7-bb2e-4dbfc8b32560?action=share&creator=34165850)**
+**Deployed link:** https://resume-analyzer-i448.onrender.com
 ## Features 🚀
 - Extract text from a **PDF resume** using `pdf-text-reader`.
 - Parse **structured data** (name, email, education, experience, skills, summary) using **Google Gemini AI** and store them in mongoDB database.
@@ -32,7 +34,7 @@ Create a `.env` file and add:
 PORT=5000
 JWT_SECRET=your_jwt_secret
 JWT_EXPIRE=5d
-MONGO_URI=mododb_uri
+MONGO_URI=mongodb_uri
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
